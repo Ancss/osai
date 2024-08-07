@@ -1,33 +1,54 @@
-use tauri::InvokeError;
+use serde::Serialize;
 use thiserror::Error;
-use walkdir::Error as WalkdirError;
 
-#[derive(Error, Debug)]
-pub enum AppError {
+#[derive(Error, Debug, Serialize)]
+pub enum OsaiError {
     #[error("IO error: {0}")]
-    Io(#[from] std::io::Error),
+    Io(String),
+    #[error("Request error: {0}")]
+    Request(String),
+    #[error("Serialization error: {0}")]
+    Serialization(String),
+    #[error("Environment variable not found: {0}")]
+    EnvVar(String),
+    #[error("Unexpected response from AI")]
+    UnexpectedAIResponse,
     #[error("File not found: {0}")]
     FileNotFound(String),
-    #[error("Command execution failed: {0}")]
-    CommandExecutionFailed(String),
-    #[error("Invalid settings: {0}")]
-    InvalidSettings(String),
-    #[error("Indexing error: {0}")]
-    IndexingError(String),
-    #[error("Walkdir error: {0}")]
-    Walkdir(#[from] WalkdirError),
-    #[error("General error: {0}")]
-    General(String),
+    #[error("Permission denied: {0}")]
+    PermissionDenied(String),
+    #[error("AI Service error: {0}")]
+    AIService(String),
+    #[error("Unknown error occurred")]
+    Unknown,
 }
 
-impl From<String> for AppError {
-    fn from(error: String) -> Self {
-        AppError::General(error)
+impl From<std::io::Error> for OsaiError {
+    fn from(err: std::io::Error) -> Self {
+        match err.kind() {
+            std::io::ErrorKind::NotFound => OsaiError::FileNotFound(err.to_string()),
+            std::io::ErrorKind::PermissionDenied => OsaiError::PermissionDenied(err.to_string()),
+            _ => OsaiError::Io(err.to_string()),
+        }
     }
 }
 
-impl From<AppError> for InvokeError {
-    fn from(error: AppError) -> Self {
-        InvokeError::from(error.to_string())
+impl From<reqwest::Error> for OsaiError {
+    fn from(err: reqwest::Error) -> Self {
+        OsaiError::Request(err.to_string())
     }
 }
+
+impl From<serde_json::Error> for OsaiError {
+    fn from(err: serde_json::Error) -> Self {
+        OsaiError::Serialization(err.to_string())
+    }
+}
+
+impl From<std::env::VarError> for OsaiError {
+    fn from(err: std::env::VarError) -> Self {
+        OsaiError::EnvVar(err.to_string())
+    }
+}
+
+pub type Result<T> = std::result::Result<T, OsaiError>;

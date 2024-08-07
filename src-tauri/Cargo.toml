@@ -1,37 +1,27 @@
 [package]
-name = "tauri-app"
-version = "0.0.0"
+name = "osai"
+version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
+license = ""
+repository = ""
+default-run = "osai"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+rust-version = "1.60"
 
 [build-dependencies]
-tauri-build = { version = "1", features = [] }
+tauri-build = { version = "1.2.1", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [ "global-shortcut-all", "shell-open"] }
-serde = { version = "1", features = ["derive"] }
-tokio = { version = "1.0", features = ["full"] }
-serde_json = "1"
-walkdir = "2.3"
-open = "5.0"
-log = "0.4"
-env_logger = "0.10"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "1.2.4", features = [ "window-set-position", "window-set-size", "window-minimize", "window-unmaximize", "fs-read-dir", "window-hide", "window-close", "fs-write-file", "window-unminimize", "fs-read-file", "window-show", "window-start-dragging", "window-maximize", "shell-open"] }
+tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 thiserror = "1.0"
-dashmap = "4.0"
-unicode-normalization = "0.1.19"
-url = "2.2.2"
-winreg = "0.10"
-winapi = { version = "0.3", features = ["shellapi", "shobjidl_core", "combaseapi", "winnt", "winerror"] }
-ole32-sys = "0.2"
-shell32-sys = "0.1"
-wmi = "0.7"
-chrono = "0.4"
-
-
+reqwest = { version = "0.11", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+window-shadows = "0.2.0"
 
 [features]
-# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]

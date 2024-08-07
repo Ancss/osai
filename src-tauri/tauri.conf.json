@@ -6,41 +6,87 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "tauri-app",
-    "version": "0.0.0"
+    "productName": "Osai",
+    "version": "0.0.1"
   },
   "tauri": {
     "allowlist": {
       "all": false,
-      "globalShortcut": {
-        "all": true
-      },
       "shell": {
         "all": false,
         "open": true
+      },
+      "fs": {
+        "all": false,
+        "readFile": true,
+        "writeFile": true,
+        "readDir": true,
+        "scope": ["$APPDATA/*", "$APPDATA/osai/*"]
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true,
+        "setSize": true,
+        "setPosition": true
       }
-    },
-    "windows": [
-      {
-        "title": "tauri-app",
-        "width": 800,
-        "height": 600
-      }
-    ],
-    "security": {
-      "csp": null
     },
     "bundle": {
       "active": true,
-      "targets": "all",
-      "identifier": "com.tauri.dev",
+      "category": "Productivity",
+      "copyright": "",
+      "deb": {
+        "depends": []
+      },
+      "externalBin": [],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
         "icons/128x128@2x.png",
         "icons/icon.icns",
         "icons/icon.ico"
-      ]
-    }
+      ],
+      "identifier": "com.osai.app",
+      "longDescription": "",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": false
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 600,
+        "width": 40,
+        "decorations": false,
+        "transparent": false,
+        "resizable": false,
+        "alwaysOnTop": true,
+        "visible": true
+      }
+    ]
   }
 }

@@ -1,25 +1,49 @@
 {
-  "name": "tauri-app",
+  "name": "osai",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite ",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@headlessui/react": "^2.1.2",
+    "@radix-ui/react-avatar": "^1.1.0",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.0",
+    "@tauri-apps/api": "^1.2.0",
+    "class-variance-authority": "^0.5.3",
+    "clsx": "^1.2.1",
+    "framer-motion": "^11.3.21",
+    "i18next": "^22.4.10",
+    "lucide-react": "^0.125.0",
+    "next-themes": "^0.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@tauri-apps/api": "^1"
+    "react-i18next": "^12.2.0",
+    "react-spring": "^9.7.4",
+    "tailwind-merge": "^1.14.0",
+    "tailwindcss-animate": "^1.0.7",
+    "tauri-plugin-autostart-api": "github:tauri-apps/tauri-plugin-autostart#v1"
   },
   "devDependencies": {
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "^5.2.2",
-    "vite": "^5.3.1",
-    "@tauri-apps/cli": "^1"
+    "@tauri-apps/cli": "^1.2.3",
+    "@types/node": "^18.7.10",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "@vitejs/plugin-react": "^3.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.7",
+    "typescript": "^4.9.5",
+    "vite": "^4.2.1"
   }
 }
