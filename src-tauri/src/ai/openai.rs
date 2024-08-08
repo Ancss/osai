@@ -19,7 +19,7 @@ impl AIModel for OpenAI {
             thought_process: "Analyzing user input".to_string(),
             plan: vec!["Step 1".to_string(), "Step 2".to_string()],
             user_confirmation_required: false,
-            confirmation_message: None,
+            // confirmation_message: None,
             execution: vec![
                 PlatformSpecificStep {
                     windows: r#"powershell -Command "Get-Process | Where-Object {$_.MainWindowTitle -like '*Notepad*'} | Select-Object -First 1 | Stop-Process""#.to_string(),

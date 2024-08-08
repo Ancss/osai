@@ -46,15 +46,17 @@ const SideDrawer = () => {
     >
       <button
         onClick={toggleDrawer}
-        className="w-[40px] h-full  flex items-center justify-center  hover:bg-blue-100 transition-colors"
+        className={`w-[40px] h-full  flex items-center justify-center  hover:bg-blue-100 transition-colors  ${
+          !isExpanded ? "" : "hidden"
+        }`}
       >
-        {!isExpanded && <ChevronLeftIcon size={24} />}
+        {<ChevronLeftIcon size={24} />}
       </button>
-      {isExpanded && (
-        <div className="flex-1 bg-white p-4 overflow-y-auto">
-          <OsaiApp setIsExpanded={setIsExpanded} />
-        </div>
-      )}
+      <div
+        className={`flex-1 p-4 overflow-y-auto ${isExpanded ? "" : "hidden"}`}
+      >
+        <OsaiApp setIsExpanded={setIsExpanded} />
+      </div>
     </div>
   );
 };

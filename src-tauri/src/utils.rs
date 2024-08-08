@@ -5,7 +5,7 @@ pub struct AIResponse {
     pub thought_process: String,
     pub plan: Vec<String>,
     pub user_confirmation_required: bool,
-    pub confirmation_message: Option<String>,
+    // pub confirmation_message: Option<String>,
     pub execution: Vec<PlatformSpecificStep>,
     pub response: String,
 }

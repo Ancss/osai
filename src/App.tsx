@@ -9,8 +9,8 @@ function App() {
     appWindow.show();
   }, []);
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <div className="App bg-transparent">
+    <ThemeProvider storageKey="vite-ui-theme">
+      <div className="App bg-transparent min-h-screen dark:bg-gray-900 dark:text-white">
         <SideDrawer />
       </div>
     </ThemeProvider>

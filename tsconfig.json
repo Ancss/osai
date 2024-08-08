@@ -27,7 +27,8 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "node_modules/config"
   ],
   "exclude": [
     "node_modules"

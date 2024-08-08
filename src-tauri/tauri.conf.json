@@ -16,6 +16,14 @@
         "all": false,
         "open": true
       },
+      "os": {
+        "all": true
+      },
+      "http": {
+        "all": false,
+        "request": true,
+        "scope": ["https://api.anthropic.com/*"]
+      },
       "fs": {
         "all": false,
         "readFile": true,
