@@ -1,25 +1,54 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronLeftIcon, ChevronRight } from "lucide-react";
-import { appWindow } from "@tauri-apps/api/window";
-import { PhysicalSize, PhysicalPosition } from "@tauri-apps/api/window";
+import {
+  LogicalPosition,
+  LogicalSize,
+  appWindow,
+} from "@tauri-apps/api/window";
+import {
+  availableMonitors,
+  primaryMonitor,
+  PhysicalPosition,
+} from "@tauri-apps/api/window";
 import OsaiApp from "./OsaiApp";
 
 const SideDrawer = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   useEffect(() => {
     const updateSizeAndPosition = async () => {
-      const screenWidth = window.screen.width;
-      const screenHeight = window.screen.height;
+      // 获取所有可用的显示器
+      const monitors = await availableMonitors();
+      // 获取主显示器
+      const primary = await primaryMonitor();
+
+      // 如果没有找到显示器，使用默认值
+      const currentMonitor = monitors[0] ||
+        primary || { size: { width: 1920, height: 1080 }, scaleFactor: 1 };
+
+      const { scaleFactor } = currentMonitor;
+      const { width: screenWidth, height: screenHeight } = currentMonitor.size;
+
       if (isExpanded) {
-        await appWindow.setSize(new PhysicalSize(400, 660));
+        await appWindow.setSize(
+          new LogicalSize(
+            screenWidth / scaleFactor - (screenWidth / scaleFactor) * 0.69,
+            (screenHeight / scaleFactor) * 0.7
+          )
+        );
         await appWindow.setPosition(
-          new PhysicalPosition(screenWidth - 385, screenHeight * 0.3)
+          new LogicalPosition(
+            screenWidth / scaleFactor - (screenWidth / scaleFactor) * 0.3,
+            (screenHeight / scaleFactor) * 0.2
+          )
         );
       } else {
-        await appWindow.setSize(new PhysicalSize(40, 24));
+        await appWindow.setSize(new LogicalSize(40, 24));
         await appWindow.setPosition(
-          new PhysicalPosition(screenWidth - 40, screenHeight * 0.6)
+          new LogicalPosition(
+            screenWidth / scaleFactor - 40,
+            (screenHeight / scaleFactor) * 0.6
+          )
         );
       }
     };

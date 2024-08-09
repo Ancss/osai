@@ -6,6 +6,7 @@ import path from "path";
 export default defineConfig(async () => ({
   plugins: [react()],
   clearScreen: false,
+  base: "./",
   server: {
     port: 3035,
     strictPort: true,
