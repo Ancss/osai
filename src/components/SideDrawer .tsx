@@ -14,7 +14,7 @@ const SideDrawer = () => {
       if (isExpanded) {
         await appWindow.setSize(new PhysicalSize(400, 528));
         await appWindow.setPosition(
-          new PhysicalPosition(screenWidth - 400, screenHeight * 0.4)
+          new PhysicalPosition(screenWidth - 380, screenHeight * 0.4)
         );
       } else {
         await appWindow.setSize(new PhysicalSize(40, 24));

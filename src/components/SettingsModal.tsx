@@ -143,7 +143,7 @@ const SettingsModal = ({
                       e.target.value
                     )
                   }
-                  placeholder={t("enterApiKey")}
+                  placeholder={t("enterApiKey")!}
                   className="flex-grow"
                 />
                 <button

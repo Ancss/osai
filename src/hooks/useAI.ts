@@ -4,6 +4,7 @@ import axios from "axios";
 import { AIResponse, OsaiError, aiProviders } from "../config/aiProviders";
 import { useSettings } from "./useSettings";
 import { invoke } from "@tauri-apps/api";
+import { Message } from "@/type";
 
 export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,10 +13,7 @@ export const useAI = () => {
   const cancelFlagRef = useRef<any>(null);
 
   const sendMessage = useCallback(
-    async (
-      input: string,
-      providerName: string = "Claude"
-    ): Promise<AIResponse> => {
+    async (messages: Message[]): Promise<AIResponse> => {
       setIsLoading(true);
 
       try {
@@ -23,12 +21,12 @@ export const useAI = () => {
           (p) => p.name === settings.AI_PROVIDER
         );
         if (!provider) {
-          throw new Error(`AI provider ${providerName} not found`);
+          throw new Error(`AI provider ${settings.AI_PROVIDER} not found`);
         }
         const apiKey = settings[`${settings.AI_PROVIDER}_API_KEY`];
         if (!apiKey) {
           throw new Error(
-            `API key for ${providerName} not set, Open settings and set the API key`
+            `API key for ${settings.AI_PROVIDER} not set, Open settings and set the API key`
           );
         }
         cancelFlagRef.current = await invoke("create_cancel_flag");
@@ -37,16 +35,14 @@ export const useAI = () => {
           model: settings.AI_MODEL,
           apiKey,
           flagId: cancelFlagRef.current,
-          messages: [
-            {
-              role: "user",
-              content: input,
-            },
-          ],
+          messages: messages,
         });
         return response;
       } catch (error) {
-        console.error(`Error sending message to ${providerName}:`, error);
+        console.error(
+          `Error sending message to ${settings.AI_PROVIDER}:`,
+          error
+        );
         const osaiError = error as OsaiError;
         if (
           osaiError.message?.includes("API key for") ||
@@ -71,12 +67,24 @@ export const useAI = () => {
     },
     [settings, t]
   );
+  const executeCode = useCallback(
+    async (code: string): Promise<{ success: boolean; output: string }> => {
+      try {
+        const result: string = await invoke("execute_code", { code });
+        return { success: true, output: result };
+      } catch (error: any) {
+        console.error("Error executing code:", error);
+        return { success: false, output: error.toString() };
+      }
+    },
+    []
+  );
   const abortRequest = useCallback(async () => {
     if (cancelFlagRef.current) {
-      await invoke("cancel_request", { cancelFlag: cancelFlagRef.current });
+      await invoke("cancel_request", { flagId: cancelFlagRef.current });
       cancelFlagRef.current = null;
       setIsLoading(false);
     }
   }, []);
-  return { sendMessage, isLoading, abortRequest };
+  return { sendMessage, isLoading, abortRequest, executeCode };
 };

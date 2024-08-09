@@ -10,9 +10,15 @@ use tokio::sync::Mutex;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MessageContent {
+    #[serde(rename = "type")]
+    pub content_type: String,
+    pub text: String,
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Message {
     pub role: String,
-    pub content: String,
+    pub content: Vec<MessageContent>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -82,9 +88,10 @@ pub async fn send_message_to_anthropic(
         "model": model,
         "system": system_prompt,
         "tools": tools,
-        "tool_choice": { "type": "tool", "name": "format_response" },
+        "tool_choice": { "type": "auto" },
         "max_tokens": max_tokens.unwrap_or(8192),
         "messages": messages,
+        "temperature":0,
         "stream": false
     });
     println!("Request body: {}", body.to_string());
@@ -99,6 +106,7 @@ pub async fn send_message_to_anthropic(
         .header("Content-Type", "application/json")
         .header("x-api-key", api_key)
         .header("anthropic-version", "2023-06-01")
+        .header("anthropic-beta", "max-tokens-3-5-sonnet-2024-07-15")
         .json(&body)
         .send();
 

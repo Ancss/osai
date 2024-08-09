@@ -24,6 +24,7 @@ export interface AIResponse {
   thought_process: string;
   plan: string[];
   user_confirmation_required: boolean;
+  should_execute_code: boolean;
   // confirmation_message: string;
   execution: Array<{
     step: string;
@@ -35,33 +36,70 @@ export interface AIResponse {
 
 const tools: Anthropic.Messages.Tool[] = [
   {
-    name: "format_response",
+    name: "os_ai_assistant",
     description:
-      "Format the AI's response into a specific JSON structure. This structure includes the AI's thought process, action plan, execution details, and final response. It also indicates whether user confirmation is required and provides a confirmation message if needed. This formatted response ensures consistent and structured communication between the AI system and the user interface.",
+      "An AI assistant for executing operating system tasks and answering queries",
     input_schema: {
       type: "object",
       properties: {
-        thought_process: { type: "string" },
-        plan: { type: "array", items: { type: "string" } },
-        user_confirmation_required: { type: "boolean" },
-        // confirmation_message: { type: "string" },
+        thought_process: {
+          type: "string",
+          description: "The AI's reasoning process for the given input",
+        },
+        plan: {
+          type: "array",
+          items: {
+            type: "string",
+          },
+          description:
+            "A list of minimal, atomic steps planned to complete the task",
+        },
+        user_confirmation_required: {
+          type: "boolean",
+          description:
+            "True only if the task involves system modifications or accessing sensitive data",
+        },
+        should_execute_code: {
+          type: "boolean",
+          description:
+            "True if the task requires executing system commands or browser actions",
+        },
         execution: {
           type: "array",
           items: {
             type: "object",
             properties: {
-              step: { type: "string" },
-              code: { type: "string" },
-              result: { type: "string" },
+              step: {
+                type: "string",
+                description: "Description of the execution step",
+              },
+              code: {
+                type: "string",
+                description:
+                  "The actual system command to be executed, or an empty string if not applicable",
+              },
+              result: {
+                type: "string",
+                description:
+                  "The expected or actual result of the execution step",
+              },
             },
+            required: ["step", "code", "result"],
           },
+          description:
+            "Detailed execution steps including only steps that require code execution",
         },
-        response: { type: "string" },
+        response: {
+          type: "string",
+          description:
+            "The final response to the user, including results or next steps, without inventing information",
+        },
       },
       required: [
         "thought_process",
         "plan",
         "user_confirmation_required",
+        "should_execute_code",
         "execution",
         "response",
       ],
@@ -100,8 +138,9 @@ const sendMessageToAnthropic = async ({
   };
   console.log(`Sending message to Claude:`, invokeParams);
   const response = await invoke("send_message_to_anthropic", invokeParams);
-  console.log(`Response from Claude:`, response);
-  return response.data as AIResponse;
+  const res = JSON.parse(response);
+  console.log(`Response from Claude:`, res);
+  return res.content[res.content.length - 1].input as AIResponse;
 
   // return JSON.parse(response.content[0].text) as AIResponse;
 };
