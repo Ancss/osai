@@ -13,7 +13,7 @@ export interface AIResponse {
   plan: string[];
   user_confirmation_required: boolean;
   should_execute_code: boolean;
-  execution: ExecutionStep[];
+  execution: string;
   response: string;
 }
 
@@ -28,4 +28,5 @@ export interface ChatMessage extends Message {
   status?: "loading" | "complete";
   aiResponse?: AIResponse;
   executionStatus?: "pending" | "executing" | "complete" | "rejected";
+  executionResult?: any;
 }

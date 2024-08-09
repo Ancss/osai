@@ -26,11 +26,7 @@ export interface AIResponse {
   user_confirmation_required: boolean;
   should_execute_code: boolean;
   // confirmation_message: string;
-  execution: Array<{
-    step: string;
-    code: string;
-    result: string;
-  }>;
+  execution: string;
   response: string;
 }
 
@@ -38,7 +34,7 @@ const tools: Anthropic.Messages.Tool[] = [
   {
     name: "os_ai_assistant",
     description:
-      "An AI assistant for executing operating system tasks and answering queries",
+      "An AI assistant for executing PowerShell tasks and answering queries",
     input_schema: {
       type: "object",
       properties: {
@@ -52,7 +48,7 @@ const tools: Anthropic.Messages.Tool[] = [
             type: "string",
           },
           description:
-            "A list of minimal, atomic steps planned to complete the task",
+            "A list of steps planned to complete the task, even if execution is in one line",
         },
         user_confirmation_required: {
           type: "boolean",
@@ -62,37 +58,17 @@ const tools: Anthropic.Messages.Tool[] = [
         should_execute_code: {
           type: "boolean",
           description:
-            "True if the task requires executing system commands or browser actions",
+            "True if the task requires executing PowerShell commands",
         },
         execution: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              step: {
-                type: "string",
-                description: "Description of the execution step",
-              },
-              code: {
-                type: "string",
-                description:
-                  "The actual system command to be executed, or an empty string if not applicable",
-              },
-              result: {
-                type: "string",
-                description:
-                  "The expected or actual result of the execution step",
-              },
-            },
-            required: ["step", "code", "result"],
-          },
+          type: "string",
           description:
-            "Detailed execution steps including only steps that require code execution",
+            "A single line of PowerShell code that executes all required actions for the task, or an empty string if not applicable",
         },
         response: {
           type: "string",
           description:
-            "The final response to the user, including results or next steps, without inventing information",
+            "The final response to the user, including potential results or next steps, without inventing information",
         },
       },
       required: [
@@ -152,10 +128,10 @@ export const aiProviders: AIProvider[] = [
     models: ["claude-3-5-sonnet-20240620", "claude-3-opus-20240229"],
     apiKeyLink: "https://console.anthropic.com/settings/keys",
   },
-  {
-    name: "GPT",
-    sendMessage: sendMessageToAnthropic,
-    models: ["gpt-4", "gpt-3.5-turbo"],
-    apiKeyLink: "https://platform.openai.com/account/api-keys",
-  },
+  // {
+  //   name: "GPT",
+  //   sendMessage: sendMessageToAnthropic,
+  //   models: ["gpt-4", "gpt-3.5-turbo"],
+  //   apiKeyLink: "https://platform.openai.com/account/api-keys",
+  // },
 ];

@@ -9,7 +9,7 @@ import { Message } from "@/type";
 export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
-  const { settings } = useSettings();
+  const { settings, getSetting } = useSettings();
   const cancelFlagRef = useRef<any>(null);
 
   const sendMessage = useCallback(
@@ -23,7 +23,9 @@ export const useAI = () => {
         if (!provider) {
           throw new Error(`AI provider ${settings.AI_PROVIDER} not found`);
         }
-        const apiKey = settings[`${settings.AI_PROVIDER}_API_KEY`];
+        const apiKey = getSetting(`${settings.AI_PROVIDER}_API_KEY`);
+        console.log("API key:", apiKey);
+        console.log("Settings", settings);
         if (!apiKey) {
           throw new Error(
             `API key for ${settings.AI_PROVIDER} not set, Open settings and set the API key`
@@ -70,6 +72,7 @@ export const useAI = () => {
   const executeCode = useCallback(
     async (code: string): Promise<{ success: boolean; output: string }> => {
       try {
+        console.log("Executing code:", code);
         const result: string = await invoke("execute_code", { code });
         return { success: true, output: result };
       } catch (error: any) {

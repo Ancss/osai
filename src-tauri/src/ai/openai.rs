@@ -20,13 +20,7 @@ impl AIModel for OpenAI {
             plan: vec!["Step 1".to_string(), "Step 2".to_string()],
             user_confirmation_required: false,
             // confirmation_message: None,
-            execution: vec![
-                PlatformSpecificStep {
-                    windows: r#"powershell -Command "Get-Process | Where-Object {$_.MainWindowTitle -like '*Notepad*'} | Select-Object -First 1 | Stop-Process""#.to_string(),
-                    macos: r#"pkill -x Notes"#.to_string(),
-                    linux: r#"pkill gedit"#.to_string(),
-                },
-            ],
+            execution: String,
             response: "This is a sample response".to_string(),
         })
     }

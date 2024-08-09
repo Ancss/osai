@@ -20,8 +20,9 @@ export const useSettings = () => {
   };
 
   const getSetting = (key: string): string => {
-    return settings[key] || "";
+    const storedSettings = localStorage.getItem("app_settings");
+    const parsedSettings = storedSettings ? JSON.parse(storedSettings) : {};
+    return parsedSettings[key] || "";
   };
-
   return { settings, setSetting, getSetting };
 };
