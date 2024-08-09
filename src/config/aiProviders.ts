@@ -6,6 +6,7 @@ import { fetch, Body, ResponseType } from "@tauri-apps/api/http";
 export interface OsaiError {
   type: string;
   message: string;
+  response: any;
 }
 interface sendMessageParams {
   model: string;
@@ -113,7 +114,7 @@ const sendMessageToAnthropic = async ({
     flagId: flagId,
   };
   console.log(`Sending message to Claude:`, invokeParams);
-  const response = await invoke("send_message_to_anthropic", invokeParams);
+  const response: any = await invoke("send_message_to_anthropic", invokeParams);
   const res = JSON.parse(response);
   console.log(`Response from Claude:`, res);
   return res.content[res.content.length - 1].input as AIResponse;
