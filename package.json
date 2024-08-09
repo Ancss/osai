@@ -29,7 +29,6 @@
     "i18next": "^22.4.10",
     "lucide-react": "^0.125.0",
     "next-themes": "^0.2.1",
-    "os-name": "^6.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^12.2.0",
