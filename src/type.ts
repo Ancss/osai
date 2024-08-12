@@ -30,3 +30,20 @@ export interface ChatMessage extends Message {
   executionStatus?: "pending" | "executing" | "complete" | "rejected";
   executionResult?: any;
 }
+
+export interface FileInfo {
+  path: string;
+  name: string;
+  extension: string | null;
+  size: number;
+  content: string;
+  mime_type: string;
+  metadata?: {
+    image_dimensions?: [number, number];
+    audio_duration?: number;
+  };
+}
+
+export interface ProcessedFileInfo extends FileInfo {
+  summary?: string;
+}

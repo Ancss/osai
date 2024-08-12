@@ -19,17 +19,27 @@
       "os": {
         "all": true
       },
+      "dialog": {
+        "all": true,
+        "open": true,
+        "save": true
+      },
       "http": {
         "all": false,
         "request": true,
         "scope": ["https://api.anthropic.com/*"]
       },
       "fs": {
-        "all": false,
+        "all": true,
         "readFile": true,
         "writeFile": true,
         "readDir": true,
-        "scope": ["$APPDATA/*", "$APPDATA/osai/*"]
+        "copyFile": true,
+        "createDir": true,
+        "removeDir": true,
+        "removeFile": true,
+        "renameFile": true,
+        "exists": true
       },
       "window": {
         "all": false,
@@ -93,7 +103,8 @@
         "transparent": false,
         "resizable": false,
         "alwaysOnTop": true,
-        "visible": true
+        "visible": true,
+        "fileDropEnabled": true
       }
     ]
   }

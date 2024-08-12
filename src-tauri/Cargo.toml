@@ -15,9 +15,8 @@ tauri-build = { version = "1.2.1", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2.4", features = [ "os-all", "http-request", "window-set-position", "window-set-size", "window-minimize", "window-unmaximize", "fs-read-dir", "window-hide", "window-close", "fs-write-file", "window-unminimize", "fs-read-file", "window-show", "window-start-dragging", "window-maximize", "shell-open"] }
+tauri = { version = "1.2.4", features = [ "dialog-all", "fs-all", "os-all", "http-request", "window-set-position", "window-set-size", "window-minimize", "window-unmaximize", "window-hide", "window-close", "window-unminimize", "window-show", "window-start-dragging", "window-maximize", "shell-open"] }
 tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-thiserror = "1.0"
 reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 async-trait = "0.1"
@@ -25,6 +24,18 @@ window-shadows = "0.2.0"
 lazy_static = "1.4"
 uuid = { version = "0.8", features = ["v4"] }
 sysinfo = "0.29.0"
+id3 = "1.5"
+base64 = "0.21"
+image = "0.24"
+docx-rs = "0.4"
+calamine = "0.22"
+zip = "0.6"
+epub = "2.1"
+xml-rs = "0.8"
+serde_yaml = "0.9"
+mime_guess = "2.0"
+thiserror = "1.0"
+anyhow = "1.0"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

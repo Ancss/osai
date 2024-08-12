@@ -34,6 +34,8 @@ const resources = {
       ExecutionResult: "Execution Result",
       success: "Success",
       failure: "Failure",
+      UploadedFiles: "Uploaded Files",
+      DropFilesHere: "Drop files here",
     },
   },
   zh: {
@@ -67,6 +69,8 @@ const resources = {
       ExecutionResult: "执行结果",
       success: "成功",
       failure: "失败",
+      UploadedFiles: "已上传的文件",
+      DropFilesHere: "将文件拖到这里",
     },
   },
 };

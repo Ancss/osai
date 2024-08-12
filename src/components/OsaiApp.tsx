@@ -9,13 +9,17 @@ import {
   Settings,
   AlertTriangle,
   ChevronRightIcon,
-  StopCircle,
-  Send,
+  FolderPlus,
+  FileIcon,
 } from "lucide-react";
 import SettingsModal from "./SettingsModal";
 import BottomInputContainer from "./BottomInputContainer";
-import { AIResponse, ChatMessage, Message } from "@/type";
+import FileUploadModal from "./FileUploadModal";
+import { AIResponse, ChatMessage, FileInfo } from "@/type";
 import i18n from "@/utils/i18n";
+import { open } from "@tauri-apps/api/dialog";
+import { invoke } from "@tauri-apps/api/tauri";
+import { listen } from "@tauri-apps/api/event";
 
 const OsaiApp = ({
   setIsExpanded,
@@ -23,19 +27,112 @@ const OsaiApp = ({
   setIsExpanded: (b: boolean) => void;
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const latestMessagesRef = useRef<ChatMessage[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<FileInfo[]>([]);
   const [input, setInput] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isFileUploadOpen, setIsFileUploadOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const { t } = useTranslation();
   const { sendMessage, isLoading, abortRequest, executeCode } = useAI();
   const messageEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    latestMessagesRef.current = messages;
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const setupListeners = async () => {
+      const unlistenFileDrop = await listen<string[]>(
+        "tauri://file-drop",
+        (event) => {
+          addFiles(event.payload);
+          setIsDragging(false);
+        }
+      );
+
+      const unlistenFileHover = await listen<null>(
+        "tauri://file-drop-hover",
+        () => {
+          setIsDragging(true);
+        }
+      );
+
+      const unlistenFileCancel = await listen<null>(
+        "tauri://file-drop-cancelled",
+        () => {
+          setIsDragging(false);
+        }
+      );
+
+      return () => {
+        unlistenFileDrop();
+        unlistenFileHover();
+        unlistenFileCancel();
+      };
+    };
+
+    const cleanup = setupListeners();
+    return () => {
+      cleanup.then((unlistenAll) => unlistenAll());
+    };
+  }, []);
+
   const toggleExpansion = () => setIsExpanded(false);
+
+  const addFiles = async (paths: string[]) => {
+    setError("");
+    try {
+      const result: { successful: FileInfo[]; failed: string[] } = await invoke(
+        "add_files",
+        { paths }
+      );
+
+      setSelectedFiles((prevFiles) => {
+        const newFiles = result.successful.filter(
+          (file) => !prevFiles.some((prevFile) => prevFile.path === file.path)
+        );
+        console.log("New files:", newFiles);
+        console.log("Previous files:", prevFiles);
+        return [...prevFiles, ...newFiles];
+      });
+
+      if (result.failed.length > 0) {
+        console.warn("Failed to add some files:", result.failed);
+        setError(
+          `Warning: ${result.failed.length} file(s) couldn't be added. They might be corrupted or in an unsupported format.`
+        );
+      }
+
+      if (result.successful.length > 0) {
+        setIsFileUploadOpen(true);
+      }
+    } catch (error) {
+      console.error("Error adding files:", error);
+      setError(
+        `Failed to add files: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  };
+
+  const handleFileSelection = async () => {
+    try {
+      const selected = await open({
+        multiple: true,
+        filters: [{ name: "All Files", extensions: ["*"] }],
+      });
+      console.log("Selected files:", selected);
+      if (selected) {
+        const paths = Array.isArray(selected) ? selected : [selected];
+        await addFiles(paths);
+      }
+    } catch (error) {
+      console.error("Error selecting files:", error);
+      setError("Failed to select files. Please try again.");
+    }
+  };
 
   const handleSend = async () => {
     if (input.trim()) {
@@ -45,10 +142,9 @@ const OsaiApp = ({
       };
       setMessages((prev) => [...prev, newMessage]);
       setInput("");
-      setError("");
+      setError(null);
 
       try {
-        // 添加一个临时的 loading 消息
         setMessages((prev) => [
           ...prev,
           {
@@ -78,10 +174,9 @@ const OsaiApp = ({
           executionResult,
         };
 
-        // 更新消息，替换 loading 消息
         setMessages((prev) => [...prev.slice(0, -1), newAssistantMessage]);
       } catch (error: any) {
-        setMessages((prev) => prev.slice(0, -2)); // 移除 loading 消息
+        setMessages((prev) => prev.slice(0, -1));
         setInput(input);
         setError(
           error.message.includes("Open settings and set the API key")
@@ -90,35 +185,6 @@ const OsaiApp = ({
         );
         console.error("Error getting AI response:", error);
       }
-    }
-  };
-
-  const executeAIResponse = async (messageIndex: number) => {
-    console.log("Executing AI response");
-    const currentMessages = latestMessagesRef.current;
-    const message = currentMessages[messageIndex];
-    console.log("Message to execute:", message);
-    if (message?.aiResponse?.execution) {
-      setMessages((prev) => {
-        const newMessages = [...prev];
-        newMessages[messageIndex] = {
-          ...message,
-          executionStatus: "executing",
-        };
-        return newMessages;
-      });
-
-      const result = await executeCode(message.aiResponse.execution);
-
-      setMessages((prev) => {
-        const newMessages = [...prev];
-        newMessages[messageIndex] = {
-          ...message,
-          executionStatus: "complete",
-          executionResult: result,
-        };
-        return newMessages;
-      });
     }
   };
 
@@ -157,7 +223,7 @@ const OsaiApp = ({
           ...newMessages[messageIndex],
           executionStatus: "rejected",
         };
-        return [...newMessages];
+        return newMessages;
       });
     }
   };
@@ -170,6 +236,21 @@ const OsaiApp = ({
             <div className="flex justify-between items-center mt-4 p-2 border-b bg-gray-50 dark:bg-gray-800">
               <h2 className="text-lg font-bold">Osai</h2>
               <div className="flex space-x-2">
+                <Button variant="ghost" size="sm" onClick={handleFileSelection}>
+                  <FolderPlus size={16} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsFileUploadOpen(true)}
+                >
+                  <FileIcon size={16} />
+                  {selectedFiles.length > 0 && (
+                    <span className="ml-1 text-xs bg-blue-500 text-white rounded-full px-2">
+                      {selectedFiles.length}
+                    </span>
+                  )}
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -191,7 +272,14 @@ const OsaiApp = ({
                 </Button>
               </div>
             </div>
-            <div className="flex-grow overflow-y-auto p-4 space-y-4">
+            <div className="flex-grow overflow-y-auto p-4 space-y-4 relative">
+              {isDragging && (
+                <div className="absolute inset-0 bg-blue-100 bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="text-2xl font-bold text-blue-500">
+                    {t("DropFilesHere")}
+                  </div>
+                </div>
+              )}
               {messages.map((msg, index) => (
                 <div
                   key={index}
@@ -215,21 +303,19 @@ const OsaiApp = ({
                     </Avatar>
                     <div className="max-w-[74%]">
                       <div
-                        className={` p-3 rounded-lg ${
+                        className={`p-3 rounded-lg ${
                           msg.role === "user"
                             ? "bg-blue-500 text-white"
                             : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white"
-                        }
-                        ${
+                        } ${
                           msg.executionStatus === "rejected" ? "opacity-80" : ""
-                        }
-                        `}
+                        }`}
                       >
                         {msg.status === "loading" ? "..." : msg.content[0].text}
                       </div>
                       {msg.aiResponse?.user_confirmation_required &&
                         msg.executionStatus === "pending" && (
-                          <div className="flex justify-center space-x-2 ">
+                          <div className="flex justify-center space-x-2 mt-2">
                             <Button
                               className="w-full"
                               onClick={() => handleConfirmation(index, true)}
@@ -245,7 +331,7 @@ const OsaiApp = ({
                           </div>
                         )}
                       {msg.executionResult && (
-                        <div className="p-2 bg-gray-100 rounded flex text-sm text-gray-600">
+                        <div className="p-2 bg-gray-100 rounded flex text-sm text-gray-600 mt-2">
                           {t("ExecutionResult")}:
                           {msg.executionResult.success
                             ? t("success")
@@ -264,7 +350,6 @@ const OsaiApp = ({
               )}
               <div ref={messageEndRef} />
             </div>
-
             <BottomInputContainer
               input={input}
               isLoading={isLoading}
@@ -278,6 +363,12 @@ const OsaiApp = ({
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+      />
+      <FileUploadModal
+        isOpen={isFileUploadOpen}
+        onClose={() => setIsFileUploadOpen(false)}
+        files={selectedFiles}
+        setFiles={setSelectedFiles}
       />
     </>
   );

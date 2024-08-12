@@ -32,13 +32,13 @@ const SideDrawer = () => {
       if (isExpanded) {
         await appWindow.setSize(
           new LogicalSize(
-            screenWidth / scaleFactor - (screenWidth / scaleFactor) * 0.69,
+            screenWidth / scaleFactor - (screenWidth / scaleFactor) * 0.79,
             (screenHeight / scaleFactor) * 0.7
           )
         );
         await appWindow.setPosition(
           new LogicalPosition(
-            screenWidth / scaleFactor - (screenWidth / scaleFactor) * 0.3,
+            screenWidth / scaleFactor - (screenWidth / scaleFactor) * 0.2,
             (screenHeight / scaleFactor) * 0.2
           )
         );
