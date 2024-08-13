@@ -66,6 +66,10 @@ const OsaiApp = ({
 
   useEffect(() => {
     const setupListeners = async () => {
+      await listen("tauri://focus", () => {
+        setIsExpanded(true);
+      });
+      await listen("tauri://blur", () => {});
       const unlistenFileDrop = await listen<string[]>(
         "tauri://file-drop",
         (event) => {
@@ -323,7 +327,12 @@ const OsaiApp = ({
       });
     }
   };
-
+  const getMessageText = (content: MessageContent): string => {
+    if (content.type === "text") {
+      return content.text;
+    }
+    return "";
+  };
   return (
     <>
       <div className="fixed bottom-4 right-4 transition-all duration-300 ease-in-out w-96 h-full">
@@ -439,7 +448,8 @@ const OsaiApp = ({
                       >
                         {msg.status === "loading"
                           ? "..."
-                          : msg.content[msg.content.length - 1].text}
+                          : msg.content.length > 0 &&
+                            getMessageText(msg.content[msg.content.length - 1])}
                       </div>
                       {msg.aiResponse?.user_confirmation_required &&
                         msg.executionStatus === "pending" && (
