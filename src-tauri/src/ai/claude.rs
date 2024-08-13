@@ -1,10 +1,9 @@
-use crate::prompts::{format_system_prompt, SYSTEM_PROMPT_TEMPLATE};
+use crate::prompts::format_system_prompt;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 use std::sync::Arc;
-use sysinfo::{System, SystemExt};
 use tauri::command;
 use tokio::sync::Mutex;
 use uuid::Uuid;

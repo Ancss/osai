@@ -73,6 +73,7 @@ const OsaiApp = ({
       });
       await listen("tauri://blur", () => {
         setIsExpanded(false);
+        setIsDragging(false);
       });
       const unlistenFileDrop = await listen<string[]>(
         "tauri://file-drop",
@@ -164,6 +165,7 @@ const OsaiApp = ({
   };
 
   const handleFileSelection = async () => {
+    setIsDragging(false);
     try {
       const selected = await open({
         multiple: true,
@@ -181,6 +183,7 @@ const OsaiApp = ({
   };
 
   const handleSend = async () => {
+    setIsDragging(false);
     if (input.trim()) {
       const content: MessageContent[] = [];
 
@@ -411,12 +414,10 @@ const OsaiApp = ({
               )}
               {isDragging && (
                 <div className="absolute inset-0 bg-blue-100 bg-opacity-50 flex flex-col items-center justify-center z-50">
-                  <div className="text-2xl font-bold text-blue-500">
+                  <div className="text-2xl font-bold ">
                     {t("dropFilesHere")}
                   </div>
-                  <div className="text-xl   text-blue-500">
-                    {t("maximumCount")}
-                  </div>
+                  <div className="text-xl   ">{t("maximumCount")}</div>
                 </div>
               )}
               {messages.map((msg, index) => (

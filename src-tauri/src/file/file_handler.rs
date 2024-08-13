@@ -1,20 +1,16 @@
 use anyhow::Result;
-use base64;
+use base64::{engine::general_purpose, Engine as _};
 use calamine::{open_workbook_auto, DataType, Reader};
 use docx_rs::*;
 use image::imageops::FilterType;
 use image::io::Reader as ImageReader;
 use image::GenericImageView;
-use lopdf;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
-use std::io::Cursor;
 use std::io::Read;
 use std::path::Path;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
 use tauri::command;
 use thiserror::Error;
 
@@ -62,8 +58,8 @@ pub enum FileProcessingError {
     Excel(String),
     #[error("JSON processing error: {0}")]
     Json(#[from] serde_json::Error),
-    #[error("Unsupported file type")]
-    UnsupportedFileType,
+    // #[error("Unsupported file type")]
+    // UnsupportedFileType,
     #[error("Other error: {0}")]
     Other(String),
 }
@@ -113,7 +109,7 @@ fn process_image(path: &Path) -> Result<FileContent, FileProcessingError> {
         &mut std::io::Cursor::new(&mut buffer),
         image::ImageOutputFormat::Jpeg(80),
     )?;
-    let base64 = base64::encode(&buffer);
+    let base64 = general_purpose::STANDARD.encode(&buffer);
     Ok(FileContent::Image(base64))
 }
 

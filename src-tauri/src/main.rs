@@ -2,7 +2,7 @@ mod ai;
 mod commands;
 mod file;
 mod prompts;
-use tauri::{CustomMenuItem, Manager, Menu, Submenu};
+use tauri::Manager;
 
 fn main() {
     tauri::Builder::default()

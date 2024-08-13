@@ -11,6 +11,7 @@ import {
   PhysicalPosition,
 } from "@tauri-apps/api/window";
 import OsaiApp from "./OsaiApp";
+import osaiLogo from "@/assets/osai-logo.svg";
 
 const SideDrawer = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -43,7 +44,7 @@ const SideDrawer = () => {
           )
         );
       } else {
-        await appWindow.setSize(new LogicalSize(40, 24));
+        await appWindow.setSize(new LogicalSize(40, 40));
         await appWindow.setPosition(
           new LogicalPosition(
             screenWidth / scaleFactor - 40,
@@ -70,16 +71,17 @@ const SideDrawer = () => {
   return (
     <div
       className={`h-full flex ${
-        isExpanded ? "w-[300px]" : "w-[40px]"
+        isExpanded ? "w-[300px]" : "w-10 h-10"
       } transition-all duration-300 ease-in-out`}
     >
       <button
         onClick={toggleDrawer}
-        className={`w-[40px] h-full  flex items-center justify-center  hover:bg-blue-100 transition-colors  ${
+        className={`w-10 h-full  flex items-center justify-center  hover:bg-blue-100 transition-colors  ${
           !isExpanded ? "" : "hidden"
         }`}
       >
-        {<ChevronLeftIcon size={24} />}
+        {/* {<ChevronLeftIcon size={24} />} */}
+        <img src={osaiLogo} alt="OSAI Logo" width="40" height="40" />
       </button>
       <div
         className={`flex-1 p-4 overflow-y-auto ${isExpanded ? "" : "hidden"}`}
