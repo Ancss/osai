@@ -7,9 +7,12 @@ use tauri::{CustomMenuItem, Manager, Menu, Submenu};
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let window = app.get_window("main").unwrap();
             #[cfg(debug_assertions)]
-            window.open_devtools();
+            {
+                let window = app.get_window("main").unwrap();
+                window.open_devtools();
+                window.close_devtools();
+            }
 
             Ok(())
         })

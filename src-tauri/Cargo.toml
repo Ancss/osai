@@ -15,7 +15,7 @@ tauri-build = { version = "1.2.1", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2.4", features = [ "dialog-all", "fs-all", "os-all", "http-request", "window-set-position", "window-set-size", "window-minimize", "window-unmaximize", "window-hide", "window-close", "window-unminimize", "window-show", "window-start-dragging", "window-maximize", "shell-open"] }
+tauri = { version = "1.2.4", features = [ "shell-open", "dialog-all", "fs-all", "os-all", "http-request", "window-set-position", "window-set-size", "window-minimize", "window-unmaximize", "window-hide", "window-close", "window-unminimize", "window-show", "window-start-dragging", "window-maximize"] }
 tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
@@ -40,7 +40,19 @@ lopdf = "0.29.0"
 pdf-extract = "0.6.4"
 rayon = "1.5"
 
+[package.metadata.bundle]
+identifier = "com.osai.app"
+icon = ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+resources = ["resources"]
+copyright = ""
+category = "Productivity"
+short_description = ""
+long_description = """
+...
+"""
 
+[package.metadata.bundle.windows]
+subsystem = "windows"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

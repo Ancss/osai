@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Squircle background -->
+  <path d="M30,100 C30,50 50,30 100,30 C150,30 170,50 170,100 C170,150 150,170 100,170 C50,170 30,150 30,100" fill="#2c3e50"/>
+  
+  <!-- Command line interface -->
+  <rect x="60" y="70" width="80" height="60" fill="none" stroke="#ecf0f1" stroke-width="4" rx="5"/>
+  
+  <!-- Cursor -->
+  <rect x="70" y="110" width="20" height="10" fill="#e74c3c"/>
+</svg>

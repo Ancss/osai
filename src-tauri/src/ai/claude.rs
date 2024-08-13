@@ -103,7 +103,7 @@ pub async fn send_message_to_anthropic(
         "temperature":0,
         "stream": false
     });
-    println!("Request body: {}", body.to_string());
+    // println!("Request body: {}", body.to_string());
 
     let cancel_flag = {
         let flags = CANCEL_FLAGS.lock().await;

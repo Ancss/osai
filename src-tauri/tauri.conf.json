@@ -41,6 +41,7 @@
         "renameFile": true,
         "exists": true
       },
+
       "window": {
         "all": false,
         "close": true,
@@ -103,8 +104,9 @@
         "transparent": false,
         "resizable": false,
         "alwaysOnTop": true,
-        "visible": true,
-        "fileDropEnabled": true
+        "visible": false,
+        "fileDropEnabled": true,
+        "title": "Osai"
       }
     ]
   }
