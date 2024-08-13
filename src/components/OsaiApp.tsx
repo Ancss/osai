@@ -44,8 +44,10 @@ const ErrorPopup = ({
 
 const OsaiApp = ({
   setIsExpanded,
+  isExpanded,
 }: {
   setIsExpanded: (b: boolean) => void;
+  isExpanded: boolean;
 }) => {
   const [isProcessingFiles, setIsProcessingFiles] = useState(false);
   const [isExecutingCode, setIsExecutingCode] = useState(false);
@@ -69,7 +71,9 @@ const OsaiApp = ({
       await listen("tauri://focus", () => {
         setIsExpanded(true);
       });
-      await listen("tauri://blur", () => {});
+      await listen("tauri://blur", () => {
+        setIsExpanded(false);
+      });
       const unlistenFileDrop = await listen<string[]>(
         "tauri://file-drop",
         (event) => {
@@ -494,6 +498,7 @@ const OsaiApp = ({
               handleSend={handleSend}
               setInput={setInput}
               abortRequest={abortRequest}
+              isExpanded={isExpanded}
             />
           </CardContent>
         </Card>

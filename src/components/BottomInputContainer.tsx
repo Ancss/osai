@@ -7,9 +7,10 @@ import {
   MIN_TEXTAREA_HEIGHT,
   MAX_TEXTAREA_HEIGHT,
 } from "@/utils/constants";
-import { Textarea } from "@chakra-ui/react";
+// import { Textarea } from "@chakra-ui/react";
 import { cn } from "@/lib/utils";
 import { Send, StopCircle } from "lucide-react";
+import { Textarea } from "./ui/textarea";
 
 const BottomInputContainer = ({
   isLoading,
@@ -19,9 +20,11 @@ const BottomInputContainer = ({
   handleSend,
   setInput,
   abortRequest,
+  isExpanded,
 }: {
   input: string;
   isLoading: boolean;
+  isExpanded: boolean;
   // stopListening: () => void;
   // startListening: () => void;
   handleSend: () => void;
@@ -39,7 +42,11 @@ const BottomInputContainer = ({
   //     startListening();
   //   }
   // };
-
+  useEffect(() => {
+    if (isExpanded && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [isExpanded]);
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     if (value.length <= MAX_CHARS) {
@@ -56,8 +63,9 @@ const BottomInputContainer = ({
     const scrollHeight = input === "" ? 45 : textarea.scrollHeight;
     const lines = scrollHeight / 45;
     const newRows = Math.max(1, Math.min(10, Math.floor(lines)));
-
-    textarea.style.height = `${newRows * 45}px`;
+    if (newRows > 3) {
+      textarea.style.height = `${newRows * 45}px`;
+    }
   };
 
   useEffect(adjustHeight, [input]);
@@ -77,6 +85,7 @@ const BottomInputContainer = ({
           value={input}
           onChange={handleInputChange}
           placeholder={t("typeMessage")!}
+          autoFocus
           className={cn(
             "flex-grow border-none bg-transparent focus:ring-0 focus:outline-none resize-none",
             "min-h-[2.5rem] py-2 px-3 text-base leading-relaxed",

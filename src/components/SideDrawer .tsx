@@ -84,7 +84,7 @@ const SideDrawer = () => {
       <div
         className={`flex-1 p-4 overflow-y-auto ${isExpanded ? "" : "hidden"}`}
       >
-        <OsaiApp setIsExpanded={setIsExpanded} />
+        <OsaiApp isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
       </div>
     </div>
   );
