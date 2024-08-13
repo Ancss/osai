@@ -1,13 +1,3 @@
-export interface MessageContent {
-  type: "text";
-  text: string;
-}
-
-export interface Message {
-  role: "user" | "assistant";
-  content: MessageContent[];
-}
-
 export interface AIResponse {
   thought_process: string;
   plan: string[];
@@ -24,7 +14,7 @@ export interface ExecutionStep {
   status?: "pending" | "success" | "failure";
 }
 
-export interface ChatMessage extends Message {
+export interface ChatMessage extends AISendMessage {
   status?: "loading" | "complete";
   aiResponse?: AIResponse;
   executionStatus?: "pending" | "executing" | "complete" | "rejected";
@@ -36,14 +26,28 @@ export interface FileInfo {
   name: string;
   extension: string | null;
   size: number;
-  content: string;
   mime_type: string;
-  metadata?: {
-    image_dimensions?: [number, number];
-    audio_duration?: number;
-  };
+  content: FileContent | null;
 }
-
+type FileContent =
+  | { Image: string }
+  | { Text: string }
+  | { Spreadsheet: string[][] }
+  | { StructuredData: string };
 export interface ProcessedFileInfo extends FileInfo {
   summary?: string;
+}
+type ImageSource = {
+  type: "base64";
+  media_type: string;
+  data: string;
+};
+
+export type MessageContent =
+  | { type: "text"; text: string }
+  | { type: "image"; source: ImageSource };
+
+export interface AISendMessage {
+  role: "user" | "assistant";
+  content: MessageContent[];
 }

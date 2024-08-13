@@ -70,7 +70,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
       <DialogContent className="sm:max-w-[425px] w-[90%]">
         <DialogHeader>
           <DialogTitle>
-            {t("UploadedFiles")} ({files.length})
+            {t("uploadedFiles")} ({files.length})
           </DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[300px] w-full ">

@@ -36,6 +36,11 @@ serde_yaml = "0.9"
 mime_guess = "2.0"
 thiserror = "1.0"
 anyhow = "1.0"
+lopdf = "0.29.0"
+pdf-extract = "0.6.4"
+rayon = "1.5"
+
+
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

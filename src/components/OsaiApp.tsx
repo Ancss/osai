@@ -11,21 +11,43 @@ import {
   ChevronRightIcon,
   FolderPlus,
   FileIcon,
+  X,
+  Loader,
 } from "lucide-react";
 import SettingsModal from "./SettingsModal";
 import BottomInputContainer from "./BottomInputContainer";
 import FileUploadModal from "./FileUploadModal";
-import { AIResponse, ChatMessage, FileInfo } from "@/type";
+import { AIResponse, ChatMessage, FileInfo, MessageContent } from "@/type";
 import i18n from "@/utils/i18n";
 import { open } from "@tauri-apps/api/dialog";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
+
+const MAX_FILES = 20;
+
+const ErrorPopup = ({
+  message,
+  onClose,
+}: {
+  message: string;
+  onClose: () => void;
+}) => (
+  <div className="fixed top-4 right-4 bg-red-500 text-white p-4 rounded shadow-lg z-50 flex items-center">
+    <AlertTriangle className="mr-2" />
+    <span>{message}</span>
+    <button onClick={onClose} className="ml-2">
+      <X size={16} />
+    </button>
+  </div>
+);
 
 const OsaiApp = ({
   setIsExpanded,
 }: {
   setIsExpanded: (b: boolean) => void;
 }) => {
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
+  const [isExecutingCode, setIsExecutingCode] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<FileInfo[]>([]);
   const [input, setInput] = useState("");
@@ -77,11 +99,24 @@ const OsaiApp = ({
       cleanup.then((unlistenAll) => unlistenAll());
     };
   }, []);
-
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
   const toggleExpansion = () => setIsExpanded(false);
 
   const addFiles = async (paths: string[]) => {
+    if (selectedFiles.length + paths.length > MAX_FILES) {
+      setError(`You can only upload a maximum of ${MAX_FILES} files.`);
+      return;
+    }
     setError("");
+    setIsProcessingFiles(true);
+
     try {
       const result: { successful: FileInfo[]; failed: string[] } = await invoke(
         "add_files",
@@ -114,6 +149,8 @@ const OsaiApp = ({
           error instanceof Error ? error.message : String(error)
         }`
       );
+    } finally {
+      setIsProcessingFiles(false);
     }
   };
 
@@ -136,9 +173,63 @@ const OsaiApp = ({
 
   const handleSend = async () => {
     if (input.trim()) {
+      const content: MessageContent[] = [];
+
+      // 计算每个文件的最大文本长度
+      const maxTextLength = Math.max(
+        5000,
+        Math.floor(50000 / (selectedFiles.length || 1))
+      );
+
+      // 处理选中的文件
+      for (const file of selectedFiles) {
+        if (file.mime_type.startsWith("image/")) {
+          // 处理图片文件
+          if (file.content && "Image" in file.content) {
+            content.push({
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: file.mime_type,
+                data: file.content.Image,
+              },
+            });
+            content.push({
+              type: "text",
+              text: `Current image path: ${file.path}`,
+            });
+          }
+        } else {
+          // 处理其他类型的文件
+          let fileContent = "";
+          if (file.content) {
+            if ("Text" in file.content) {
+              fileContent = file.content.Text;
+            } else if ("Spreadsheet" in file.content) {
+              fileContent = file.content.Spreadsheet.map((row) =>
+                row.join(", ")
+              ).join("\n");
+            } else if ("StructuredData" in file.content) {
+              fileContent = file.content.StructuredData;
+            }
+          }
+
+          // 限制文件内容长度
+          if (fileContent.length > maxTextLength) {
+            fileContent = fileContent.substring(0, maxTextLength) + "...";
+          }
+
+          content.push({
+            type: "text",
+            text: `File name: ${file.name}\nFile path: ${file.path}\nFile content:\n${fileContent}`,
+          });
+        }
+      }
+      // 添加用户输入的文本
+      content.push({ type: "text", text: input.trim() });
       const newMessage: ChatMessage = {
         role: "user",
-        content: [{ type: "text", text: input }],
+        content: content,
       };
       setMessages((prev) => [...prev, newMessage]);
       setInput("");
@@ -154,8 +245,9 @@ const OsaiApp = ({
           },
         ]);
 
+        // send 20 most recent messages to the AI
         const aiResponse: AIResponse = await sendMessage([
-          ...messages,
+          ...messages.slice(-19),
           newMessage,
         ]);
 
@@ -175,8 +267,9 @@ const OsaiApp = ({
         };
 
         setMessages((prev) => [...prev.slice(0, -1), newAssistantMessage]);
+        setSelectedFiles([]);
       } catch (error: any) {
-        setMessages((prev) => prev.slice(0, -1));
+        setMessages((prev) => prev.slice(0, -2));
         setInput(input);
         setError(
           error.message.includes("Open settings and set the API key")
@@ -203,8 +296,10 @@ const OsaiApp = ({
           };
           return newMessages;
         });
+        setIsExecutingCode(true);
 
         const result = await executeCode(message.aiResponse.execution);
+        setIsExecutingCode(false);
 
         setMessages((prev) => {
           const newMessages = [...prev];
@@ -234,10 +329,28 @@ const OsaiApp = ({
         <Card className="w-full h-full overflow-hidden shadow-lg">
           <CardContent className="flex flex-col h-full p-0">
             <div className="flex justify-between items-center mt-4 p-2 border-b bg-gray-50 dark:bg-gray-800">
-              <h2 className="text-lg font-bold">Osai</h2>
+              <h2
+                className="text-lg font-bold cursor-pointer"
+                onClick={() => {
+                  setMessages([]);
+                  setInput("");
+                  setSelectedFiles([]);
+                }}
+              >
+                Osai
+              </h2>
               <div className="flex space-x-2">
-                <Button variant="ghost" size="sm" onClick={handleFileSelection}>
-                  <FolderPlus size={16} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleFileSelection}
+                  disabled={isProcessingFiles}
+                >
+                  {isProcessingFiles ? (
+                    <Loader className="animate-spin" size={16} />
+                  ) : (
+                    <FolderPlus size={16} />
+                  )}
                 </Button>
                 <Button
                   variant="ghost"
@@ -273,10 +386,21 @@ const OsaiApp = ({
               </div>
             </div>
             <div className="flex-grow overflow-y-auto p-4 space-y-4 relative">
+              {isExecutingCode && (
+                <div className=" fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <Loader className="animate-spin text-white" size={32} />
+                  <span className="ml-2 text-white">
+                    {t("ExecutingCode")}...
+                  </span>
+                </div>
+              )}
               {isDragging && (
-                <div className="absolute inset-0 bg-blue-100 bg-opacity-50 flex items-center justify-center z-50">
+                <div className="absolute inset-0 bg-blue-100 bg-opacity-50 flex flex-col items-center justify-center z-50">
                   <div className="text-2xl font-bold text-blue-500">
-                    {t("DropFilesHere")}
+                    {t("dropFilesHere")}
+                  </div>
+                  <div className="text-xl   text-blue-500">
+                    {t("maximumCount")}
                   </div>
                 </div>
               )}
@@ -311,7 +435,9 @@ const OsaiApp = ({
                           msg.executionStatus === "rejected" ? "opacity-80" : ""
                         }`}
                       >
-                        {msg.status === "loading" ? "..." : msg.content[0].text}
+                        {msg.status === "loading"
+                          ? "..."
+                          : msg.content[msg.content.length - 1].text}
                       </div>
                       {msg.aiResponse?.user_confirmation_required &&
                         msg.executionStatus === "pending" && (
@@ -342,12 +468,12 @@ const OsaiApp = ({
                   </div>
                 </div>
               ))}
-              {error && (
+              {/* {error && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-              )}
+              )} */}
               <div ref={messageEndRef} />
             </div>
             <BottomInputContainer
@@ -370,6 +496,7 @@ const OsaiApp = ({
         files={selectedFiles}
         setFiles={setSelectedFiles}
       />
+      {error && <ErrorPopup message={error} onClose={() => setError(null)} />}
     </>
   );
 };

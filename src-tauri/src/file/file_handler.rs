@@ -1,14 +1,20 @@
 use anyhow::Result;
 use base64;
 use calamine::{open_workbook_auto, DataType, Reader};
-use docx_rs::read_docx;
+use docx_rs::*;
+use image::imageops::FilterType;
 use image::io::Reader as ImageReader;
+use image::GenericImageView;
+use lopdf;
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
 use std::io::Cursor;
 use std::io::Read;
 use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 use tauri::command;
 use thiserror::Error;
 
@@ -63,26 +69,52 @@ pub enum FileProcessingError {
 }
 
 #[command]
-pub fn add_files(paths: Vec<String>) -> AddFilesResult {
-    let mut result = AddFilesResult {
-        successful: Vec::new(),
-        failed: Vec::new(),
+pub async fn add_files(paths: Vec<String>) -> AddFilesResult {
+    let results: Vec<_> = paths
+        .par_iter()
+        .map(|path| {
+            process_file(path).map_err(|error| FailedFile {
+                path: path.clone(),
+                error: error.to_string(),
+            })
+        })
+        .collect();
+
+    let (successful, failed): (Vec<_>, Vec<_>) = results.into_iter().partition(Result::is_ok);
+    AddFilesResult {
+        successful: successful.into_iter().map(Result::unwrap).collect(),
+        failed: failed.into_iter().map(Result::unwrap_err).collect(),
+    }
+}
+
+fn process_image(path: &Path) -> Result<FileContent, FileProcessingError> {
+    let img = ImageReader::open(path)?.decode()?;
+
+    let (width, height) = img.dimensions();
+    let max_dimension = 1024.0;
+    let scale = if width > height {
+        max_dimension / width as f32
+    } else {
+        max_dimension / height as f32
     };
 
-    for path in paths {
-        match process_file(&path) {
-            Ok(file_info) => result.successful.push(file_info),
-            Err(e) => {
-                eprintln!("Error processing file {}: {}", path, e);
-                result.failed.push(FailedFile {
-                    path,
-                    error: e.to_string(),
-                });
-            }
-        }
-    }
+    let resized = if scale < 1.0 {
+        img.resize(
+            (width as f32 * scale) as u32,
+            (height as f32 * scale) as u32,
+            FilterType::Lanczos3,
+        )
+    } else {
+        img
+    };
 
-    result
+    let mut buffer = Vec::new();
+    resized.write_to(
+        &mut std::io::Cursor::new(&mut buffer),
+        image::ImageOutputFormat::Jpeg(80),
+    )?;
+    let base64 = base64::encode(&buffer);
+    Ok(FileContent::Image(base64))
 }
 
 fn process_file(path: &str) -> Result<FileInfo, FileProcessingError> {
@@ -130,24 +162,8 @@ fn process_content(path: &Path, mime_type: &str) -> Result<FileContent, FileProc
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => process_xlsx(path),
         "application/json" => process_json(path),
         m if m.starts_with("text/") => process_text(path),
-        _ => Err(FileProcessingError::UnsupportedFileType),
+        _ => process_text(path),
     }
-}
-
-fn process_image(path: &Path) -> Result<FileContent, FileProcessingError> {
-    let img = ImageReader::open(path)?.decode()?;
-    let mut buffer = Cursor::new(Vec::new());
-    img.write_to(&mut buffer, image::ImageOutputFormat::Png)?;
-    let base64 = base64::encode(buffer.into_inner());
-    Ok(FileContent::Image(base64))
-}
-
-fn process_pdf(path: &Path) -> Result<FileContent, FileProcessingError> {
-    // 注意：这里我们只读取PDF的内容，不进行实际的文本提取
-    // 如果需要提取文本，您可能需要使用如 pdf-extract 这样的库
-    let content = fs::read_to_string(path).map_err(|e| FileProcessingError::Pdf(e.to_string()))?;
-    let summary = summarize_text(&content, 1000);
-    Ok(FileContent::Text(summary))
 }
 
 fn process_docx(path: &Path) -> Result<FileContent, FileProcessingError> {
@@ -155,15 +171,34 @@ fn process_docx(path: &Path) -> Result<FileContent, FileProcessingError> {
     let mut buf = Vec::new();
     file.read_to_end(&mut buf)?;
 
-    let doc = read_docx(&buf).map_err(|e| FileProcessingError::Docx(e.to_string()))?;
-    // let content = doc
-    //     .paragraphs()
-    //     .iter()
-    //     .map(|p| p.text())
-    //     .collect::<Vec<String>>()
-    //     .join("\n");
-    let content = doc.json().to_string();
-    let summary = summarize_text(&content, 1000);
+    let docx = read_docx(&buf).map_err(|e| FileProcessingError::Docx(e.to_string()))?;
+    let mut content = String::new();
+
+    // 遍历文档的所有元素
+    for child in docx.document.children.iter() {
+        if let DocumentChild::Paragraph(paragraph) = child {
+            for child in paragraph.children.iter() {
+                if let ParagraphChild::Run(run) = child {
+                    for child in run.children.iter() {
+                        if let RunChild::Text(text) = child {
+                            content.push_str(&text.text);
+                            content.push(' ');
+                        }
+                    }
+                }
+            }
+            content.push('\n');
+        }
+    }
+
+    let summary = summarize_text(&content, None);
+    Ok(FileContent::Text(summary))
+}
+
+fn process_pdf(path: &Path) -> Result<FileContent, FileProcessingError> {
+    let content = pdf_extract::extract_text(path)
+        .map_err(|e| FileProcessingError::Pdf(format!("Failed to extract PDF text: {}", e)))?;
+    let summary = summarize_text(&content, None);
     Ok(FileContent::Text(summary))
 }
 
@@ -201,17 +236,22 @@ fn process_json(path: &Path) -> Result<FileContent, FileProcessingError> {
 
 fn process_text(path: &Path) -> Result<FileContent, FileProcessingError> {
     let content = fs::read_to_string(path)?;
-    let summary = summarize_text(&content, 1000);
+    let summary = summarize_text(&content, None);
     Ok(FileContent::Text(summary))
 }
 
-fn summarize_text(text: &str, max_length: usize) -> String {
-    let words: Vec<&str> = text.split_whitespace().collect();
-    let summary: String = words
-        .iter()
-        .take(max_length / 5)
-        .cloned()
-        .collect::<Vec<&str>>()
-        .join(" ");
-    summary.chars().take(max_length).collect()
+fn summarize_text(text: &str, max_length: Option<usize>) -> String {
+    match max_length {
+        Some(max_len) => {
+            let words: Vec<&str> = text.split_whitespace().collect();
+            let summary: String = words
+                .iter()
+                .take(max_len / 5)
+                .cloned()
+                .collect::<Vec<&str>>()
+                .join(" ");
+            summary.chars().take(max_len).collect()
+        }
+        None => text.to_string(),
+    }
 }

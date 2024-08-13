@@ -32,7 +32,8 @@ export const useAI = () => {
           );
         }
         cancelFlagRef.current = await invoke("create_cancel_flag");
-
+        console.log("Cancel flag:", cancelFlagRef.current);
+        console.log("Sending message to messages:", messages);
         const response = await provider.sendMessage({
           model: settings.AI_MODEL,
           apiKey,

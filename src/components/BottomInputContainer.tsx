@@ -52,6 +52,7 @@ const BottomInputContainer = ({
     if (!textarea) return;
 
     textarea.style.height = "auto";
+    console.log("textarea.scrollHeight", textarea.scrollHeight);
     const scrollHeight = input === "" ? 45 : textarea.scrollHeight;
     const lines = scrollHeight / 45;
     const newRows = Math.max(1, Math.min(10, Math.floor(lines)));

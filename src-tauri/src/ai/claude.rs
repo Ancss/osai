@@ -10,10 +10,19 @@ use tokio::sync::Mutex;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct MessageContent {
+#[serde(tag = "type")]
+pub enum MessageContent {
+    #[serde(rename = "text")]
+    Text { text: String },
+    #[serde(rename = "image")]
+    Image { source: ImageSource },
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ImageSource {
     #[serde(rename = "type")]
-    pub content_type: String,
-    pub text: String,
+    pub source_type: String,
+    pub media_type: String,
+    pub data: String,
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Message {
@@ -88,7 +97,7 @@ pub async fn send_message_to_anthropic(
         "model": model,
         "system": system_prompt,
         "tools": tools,
-        "tool_choice": { "type": "auto" },
+        "tool_choice": { "type": "tool", "name": "os_ai_assistant" },
         "max_tokens": max_tokens.unwrap_or(8192),
         "messages": messages,
         "temperature":0,
