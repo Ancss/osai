@@ -4,7 +4,7 @@ import axios from "axios";
 import { AIResponse, OsaiError, aiProviders } from "../config/aiProviders";
 import { useSettings } from "./useSettings";
 import { invoke } from "@tauri-apps/api";
-import { Message } from "@/type";
+import { AISendMessage } from "@/type";
 
 export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +13,7 @@ export const useAI = () => {
   const cancelFlagRef = useRef<any>(null);
 
   const sendMessage = useCallback(
-    async (messages: Message[]): Promise<AIResponse> => {
+    async (messages: AISendMessage[]): Promise<AIResponse> => {
       setIsLoading(true);
 
       try {

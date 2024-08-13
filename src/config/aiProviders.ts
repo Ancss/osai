@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { invoke, os } from "@tauri-apps/api";
 import axios from "axios";
 import { fetch, Body, ResponseType } from "@tauri-apps/api/http";
+import { AISendMessage } from "@/type";
 
 export interface OsaiError {
   type: string;
@@ -12,7 +13,7 @@ interface sendMessageParams {
   model: string;
   apiKey: string;
   flagId?: string;
-  messages: Anthropic.Messages.MessageParam[];
+  messages: AISendMessage[];
 }
 export interface AIProvider {
   name: string;
