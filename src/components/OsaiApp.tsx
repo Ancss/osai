@@ -22,6 +22,7 @@ import i18n from "@/utils/i18n";
 import { open } from "@tauri-apps/api/dialog";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
+import osaiLogo from "@/assets/osai-logo.svg";
 
 const MAX_FILES = 20;
 
@@ -330,13 +331,14 @@ const OsaiApp = ({
           <CardContent className="flex flex-col h-full p-0">
             <div className="flex justify-between items-center mt-4 p-2 border-b bg-gray-50 dark:bg-gray-800">
               <h2
-                className="text-lg font-bold cursor-pointer"
+                className="text-lg font-bold flex items-center cursor-pointer"
                 onClick={() => {
                   setMessages([]);
                   setInput("");
                   setSelectedFiles([]);
                 }}
               >
+                <img src={osaiLogo} alt="OSAI Logo" width="40" height="40" />
                 Osai
               </h2>
               <div className="flex space-x-2">
