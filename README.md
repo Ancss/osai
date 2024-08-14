@@ -4,6 +4,8 @@ OSAI is an AI-powered operating system assistant designed to enhance the user's 
 
 **OSAI's functionality is not limited to the features showcased below; its capabilities are only limited by how you choose to use it.**
 
+[中文文档](./README.zh.md)
+
 ## Feature Showcase
 
 ### 1. Explain and Rename PDF Files
