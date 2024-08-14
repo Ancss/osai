@@ -10,7 +10,7 @@ OSAI is an AI-powered operating system assistant designed to enhance the user's 
 
 ### 1. Explain and Rename PDF Files
 
-![pdf](./public/environmentvariable2.gif)
+![pdf](./public/pdf.gif)
 
 ### 2. Batch Rename Images
 

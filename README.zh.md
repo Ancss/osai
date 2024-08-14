@@ -8,7 +8,7 @@ OSAI 是一个操作系统 AI 助手，旨在通过自然语言交互增强用�
 
 ### 1. 解释、重命名 PDF 文件
 
-![pdf](./public/environmentvariable2.gif)
+![pdf](./public/pdf.gif)
 
 ### 2. 批量重命名图片
 
