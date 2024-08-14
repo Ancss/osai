@@ -183,6 +183,7 @@ const OsaiApp = ({
   };
 
   const handleSend = async () => {
+    if (isLoading || isProcessingFiles) return;
     setIsDragging(false);
     if (input.trim()) {
       const content: MessageContent[] = [];
