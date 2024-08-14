@@ -1,36 +1,42 @@
 # OSAI: Intelligent Operating System Assistant
 
-OSAI is an innovative AI assistant for operating systems, designed to enhance the user experience through natural language interaction. It integrates powerful AI capabilities to understand and execute various system-level tasks, providing users with an intelligent solution for operating system management and control.
+OSAI is an AI-powered operating system assistant designed to enhance the user's operating system experience through natural language interaction. It integrates powerful AI capabilities to understand and execute various system-level tasks, providing intelligent solutions for operating system management and control.
 
-[中文文档](./README.zh.md)
+**OSAI's functionality is not limited to the features showcased below; its capabilities are only limited by how you choose to use it.**
 
 ## Feature Showcase
 
-### 1. Open YouTube and Search for AI
+### 1. Explain and Rename PDF Files
+
+![pdf](./public/environmentvariable2.gif)
+
+### 2. Batch Rename Images
+
+![renameimages](./public/renameimages.gif)
+
+### 3. Classify Files by Style and Type
+
+![classification](./public/classification.gif)
+
+### 4. Add, View, and Delete Environment Variables
+
+![environmentvariable2](./public/environmentvariable2.gif)
+
+### 5. Open YouTube and Search for AI
 
 ![open youtube](./public/openYoutube.gif)
 
-### 2. Add System Notifications
+### 6. Add System Notifications
 
 ![reminderstart](./public/reminderstart.gif)
 
-#### Open System Notifications
+### 7. Open System Notifications
 
 ![openreminder](./public/openreminder.gif)
 
-### 3. Add, View, and Delete Environment Variables
+## Basic Operation Guide
 
-![environmentvariable](./public/environmentvariable.gif)
-
-## Upcoming Features
-
-- **AI-Powered Multi-File Renaming**: Automatically generate meaningful names for batch files by analyzing their content using AI.
-- **AI-Driven File Classification**: Intelligently identify file types and content for automatic organization and classification.
-- **Voice Control Integration**: Support voice commands for a hands-free system control experience.
-
-## Basic Usage Guide
-
-To use OSAI, you need a Claude API key. Please [click here to obtain one](https://console.anthropic.com/settings/keys), then open the application and add it in the settings.
+Usage requires a Claude API key. Please click [here](https://console.anthropic.com/settings/keys) to obtain one, and add it in the application settings.
 
 ## Technical Requirements
 
@@ -59,7 +65,7 @@ To use OSAI, you need a Claude API key. Please [click here to obtain one](https:
    ```
    npm run tauri dev
    ```
-2. Build for production:
+2. Build production version:
    ```
    npm run tauri build
    ```
