@@ -18,7 +18,7 @@ OSAI is an AI-powered operating system assistant designed to enhance the user's 
 
 ### 3. Classify Files by Style and Type
 
-![classification](./public/classification.gif)
+![classification](./public/classification2.gif)
 
 ### 4. Add, View, and Delete Environment Variables
 
