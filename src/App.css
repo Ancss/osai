@@ -117,3 +117,8 @@
 .dark .scrollbar {
   scrollbar-color: #4b5563 transparent;
 }
+body,
+#root {
+  background: none !important;
+  background-color: transparent !important;
+}

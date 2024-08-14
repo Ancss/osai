@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronLeftIcon, ChevronRight } from "lucide-react";
 import {
   LogicalPosition,
   LogicalSize,
+  PhysicalSize,
   appWindow,
 } from "@tauri-apps/api/window";
 import {
@@ -18,51 +19,45 @@ const SideDrawer = () => {
 
   useEffect(() => {
     const updateSizeAndPosition = async () => {
-      // 获取所有可用的显示器
       const monitors = await availableMonitors();
-      // 获取主显示器
       const primary = await primaryMonitor();
-
-      // 如果没有找到显示器，使用默认值
       const currentMonitor = monitors[0] ||
         primary || { size: { width: 1920, height: 1080 }, scaleFactor: 1 };
-
+      console.log("Current monitor:", currentMonitor);
       const { scaleFactor } = currentMonitor;
       const { width: screenWidth, height: screenHeight } = currentMonitor.size;
 
+      // 使用物理像素
       if (isExpanded) {
+        const expandedWidth = Math.max(
+          Math.round((screenWidth / 1920) * 375 * scaleFactor),
+          375
+        );
+        console.log("Expanded width:", expandedWidth);
+        // const expandedWidth = Math.round(screenWidth * 0.2) - 16;
+        const expandedHeight = Math.round((screenHeight * 0.7) / scaleFactor);
         await appWindow.setSize(
-          new LogicalSize(
-            screenWidth / scaleFactor - (screenWidth / scaleFactor) * 0.79,
-            (screenHeight / scaleFactor) * 0.7
-          )
+          new PhysicalSize(expandedWidth, expandedHeight)
         );
-        await appWindow.setPosition(
-          new LogicalPosition(
-            screenWidth / scaleFactor - (screenWidth / scaleFactor) * 0.2,
-            (screenHeight / scaleFactor) * 0.2
-          )
-        );
+
+        const posX = screenWidth - expandedWidth - 8;
+        const posY = Math.round((screenHeight * 0.2) / scaleFactor);
+        await appWindow.setPosition(new PhysicalPosition(posX, posY));
       } else {
-        await appWindow.setSize(new LogicalSize(40, 40));
-        await appWindow.setPosition(
-          new LogicalPosition(
-            screenWidth / scaleFactor - 40,
-            (screenHeight / scaleFactor) * 0.6
-          )
+        const collapsedWidth = 40 * scaleFactor;
+        const collapsedHeight = 32 * scaleFactor;
+        await appWindow.setSize(
+          new PhysicalSize(collapsedWidth, collapsedHeight)
         );
+
+        const posX = screenWidth - collapsedWidth;
+        const posY = Math.round(screenHeight * 0.6);
+        await appWindow.setPosition(new PhysicalPosition(posX, posY));
       }
     };
+
     updateSizeAndPosition();
   }, [isExpanded]);
-
-  useEffect(() => {
-    const initPosition = async () => {
-      const screenWidth = window.screen.width;
-      await appWindow.setPosition(new PhysicalPosition(screenWidth - 40, 0));
-    };
-    initPosition();
-  }, []);
 
   const toggleDrawer = () => {
     setIsExpanded(!isExpanded);
@@ -71,17 +66,17 @@ const SideDrawer = () => {
   return (
     <div
       className={`h-full flex ${
-        isExpanded ? "w-[300px]" : "w-10 h-10"
+        isExpanded ? "w-full" : "w-10 h-10"
       } transition-all duration-300 ease-in-out`}
     >
       <button
         onClick={toggleDrawer}
-        className={`w-10 h-full  flex items-center justify-center  hover:bg-blue-100 transition-colors  ${
+        className={`w-10 h-full flex items-center justify-center  hover:bg-blue-100 transition-colors  ${
           !isExpanded ? "" : "hidden"
         }`}
       >
         {/* {<ChevronLeftIcon size={24} />} */}
-        <img src={osaiLogo} alt="OSAI Logo" width="40" height="40" />
+        <img src={osaiLogo} alt="OSAI Logo" width="32" height="32" />
       </button>
       <div
         className={`flex-1 p-4 overflow-y-auto ${isExpanded ? "" : "hidden"}`}

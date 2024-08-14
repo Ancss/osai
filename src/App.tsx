@@ -10,7 +10,7 @@ function App() {
   }, []);
   return (
     <ThemeProvider storageKey="vite-ui-theme">
-      <div className="App bg-transparent min-h-screen dark:bg-gray-900 dark:text-white">
+      <div className="App bg-transparent min-h-screen ">
         <SideDrawer />
       </div>
     </ThemeProvider>

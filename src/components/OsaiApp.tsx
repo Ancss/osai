@@ -72,7 +72,7 @@ const OsaiApp = ({
         setIsExpanded(true);
       });
       await listen("tauri://blur", () => {
-        setIsExpanded(false);
+        // setIsExpanded(false);
         setIsDragging(false);
       });
       const unlistenFileDrop = await listen<string[]>(
@@ -342,7 +342,7 @@ const OsaiApp = ({
   };
   return (
     <>
-      <div className="fixed bottom-4 right-4 transition-all duration-300 ease-in-out w-96 h-full">
+      <div className="fixed w-[375px] left-0 bottom-4 right-4 transition-all duration-300 ease-in-out h-full">
         <Card className="w-full h-full overflow-hidden shadow-lg">
           <CardContent className="flex flex-col h-full p-0">
             <div className="flex justify-between items-center mt-4 p-2 border-b bg-gray-50 dark:bg-gray-800">
@@ -443,7 +443,7 @@ const OsaiApp = ({
                     </Avatar>
                     <div className="max-w-[74%]">
                       <div
-                        className={`p-3 rounded-lg ${
+                        className={`p-3 rounded-lg  break-words ${
                           msg.role === "user"
                             ? "bg-blue-500 text-white"
                             : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white"

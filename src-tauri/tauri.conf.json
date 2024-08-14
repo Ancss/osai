@@ -101,7 +101,7 @@
         "height": 600,
         "width": 40,
         "decorations": false,
-        "transparent": false,
+        "transparent": true,
         "resizable": false,
         "alwaysOnTop": true,
         "visible": false,
