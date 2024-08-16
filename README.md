@@ -1,6 +1,6 @@
 # OSAI: Intelligent Operating System Assistant
 
-OSAI is an AI-powered operating system assistant designed to enhance the user's operating system experience through natural language interaction. It integrates powerful AI capabilities to understand and execute various system-level tasks, providing intelligent solutions for operating system management and control.
+OSAI is an AI-powered operating system assistant designed to enhance the user's operating system experience through natural language interaction. It integrates powerful AI capabilities to understand and execute various system-level tasks for Windows Macos and Linux, providing intelligent solutions for operating system management and control.
 
 **OSAI's functionality is not limited to the features showcased below; its capabilities are only limited by how you choose to use it.**
 
